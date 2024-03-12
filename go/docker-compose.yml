@@ -1,0 +1,14 @@
+services:
+  nginx:
+    image: nginx:1.25.3
+    ports:
+      - 8080:80
+  mariadb:
+    image: mariadb:11.2.2
+    environment:
+      - MYSQL_DATABASE=poo
+      - MYSQL_USER=user
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_PASSWORD=user
+    ports:
+      - 3306:3306
