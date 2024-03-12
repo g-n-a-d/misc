@@ -1,0 +1,29 @@
+version: "3"
+
+networks:
+  crud:
+    driver: bridge
+
+services:
+  mariadb:
+    image: mariadb:11.2.2
+    environment:
+      - MYSQL_DATABASE=poo
+      - MYSQL_USER=user
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_PASSWORD=password
+    networks:
+      - crud
+    ports:
+      - 3306:3306
+  app:
+    build: ./
+    networks:
+      - crud
+    links:
+      - mariadb
+    ports:
+      - 8888:8080
+    depends_on:
+      - mariadb
+    restart: on-failure
