@@ -158,44 +158,6 @@ services:
       - 8427:8427
     restart: always
 
-  # vmalert executes alerting and recording rules
-  vmalert:
-    container_name: vmalert
-    image: victoriametrics/vmalert:v1.100.0
-    depends_on:
-      - "vmauth"
-    ports:
-      - 8880:8880
-    volumes:
-      - ./alerts-cluster.yml:/etc/alerts/alerts.yml
-      - ./alerts-health.yml:/etc/alerts/alerts-health.yml
-      - ./alerts-vmagent.yml:/etc/alerts/alerts-vmagent.yml
-      - ./alerts-vmalert.yml:/etc/alerts/alerts-vmalert.yml
-    command:
-      - '--datasource.url=http://vmauth:8427/select/0/prometheus'
-      - '--remoteRead.url=http://vmauth:8427/select/0/prometheus'
-      - '--remoteWrite.url=http://vminsert:8480/insert/0/prometheus'
-      - '--notifier.url=http://alertmanager:9093/'
-      - '--rule=/etc/alerts/*.yml'
-      # display source of alerts in grafana
-      - '-external.url=http://127.0.0.1:3000' #grafana outside container
-      # when copypaste the line below be aware of '$$' for escaping in '$expr'
-      - '--external.alert.source=explore?orgId=1&left={"datasource":"VictoriaMetrics","queries":[{"expr":{{$$expr|jsonEscape|queryEscape}},"refId":"A"}],"range":{"from":"now-1h","to":"now"}}'
-    restart: always
-
-  # alertmanager receives alerting notifications from vmalert
-  # and distributes them according to --config.file.
-  alertmanager:
-    container_name: alertmanager
-    image: prom/alertmanager:v0.27.0
-    volumes:
-      - ./alertmanager.yml:/config/alertmanager.yml
-    command:
-      - '--config.file=/config/alertmanager.yml'
-    ports:
-      - 9093:9093
-    restart: always
-
 volumes:
   vmagentdata: {}
   strgdata-1: {}
